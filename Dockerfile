@@ -1,6 +1,12 @@
 # Utiliser une image officielle Rust comme base
 FROM rust:1.72-slim
 
+# Installer OpenSSL et pkg-config
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 # Définir le répertoire de travail à l'intérieur du conteneur
 WORKDIR /usr/src/app
 
