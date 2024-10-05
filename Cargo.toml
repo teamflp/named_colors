@@ -1,23 +1,21 @@
 [package]
 name = "named_colors"
 version = "0.1.0"
-authors = ["Paterne GNONZION"]
-description = "Un module Rust permettant de gérer les couleurs par nom"
-repository = "https://github.com/PaterneGNONZION/named_colors_rust"
-license = "MIT"
+authors = ["Paterne GNONZION <teamflp@yahoo.it>"]
+description = "A Rust library that provides named colors in RGB and Hexadecimal formats."
+repository = "https://github.com/teamflp/named_colors"
+license = "MIT OR Apache-2.0"
 edition = "2021"
-
-[lib]
-name = "named_colors"
-path = "src/lib.rs"
-
-[features]
-# Ajouter des features pour les tests
+keywords = ["colors", "rgb", "hex", "colors", "rust"]
+categories = []
+readme = "README.md"
+documentation = "https://docs.rs/named_colors"
+homepage = "https://github.com/teamflp/named_colors"
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-reqwest = "0.12.8"
+reqwest = { version = "0.12.8", features = ["blocking", "json"] }
 
-[dev-dependencies]
-# Pour les tests
+[lib]
+path = "src/lib.rs"
