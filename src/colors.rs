@@ -7,10 +7,15 @@ use std::path::Path;
 use std::time::Duration;
 
 const COLORS_JSON_URL: &str = "https://raw.githubusercontent.com/teamflp/named_colors/master/named_colors.json";
-const CACHE_FILE_PATH: &str = "cache/named_colors.json"; // Chemin pour le fichier cache local
-const CACHE_EXPIRATION_DURATION: Duration = Duration::from_secs(60 * 60 * 24); // Expiration du cache après 24 heures
+const CACHE_FILE_PATH: &str = "cache/named_colors.json"; // Path for the local cache file
+const CACHE_EXPIRATION_DURATION: Duration = Duration::from_secs(60 * 60 * 24); // Cache expiration after 24 hours
 
-// Vérifie si le cache est encore valide (non expiré)
+/// Checks if the cache is still valid based on the file's last modification time.
+/// If the cache was modified less than 24 hours ago, it is considered valid.
+/// 
+/// # Returns:
+/// * `true` if the cache is valid.
+/// * `false` if the cache is expired or there is an error accessing the file.
 fn is_cache_valid() -> bool {
     if let Ok(metadata) = fs::metadata(CACHE_FILE_PATH) {
         if let Ok(modified_time) = metadata.modified() {
@@ -22,24 +27,36 @@ fn is_cache_valid() -> bool {
     false
 }
 
-// Télécharge et charge les couleurs à partir du cache ou du fichier en ligne
+/// ```rust
+/// use named_colors::colors::load_colors;
+/// use tokio;  // Necessary to run async
+///
+/// #[tokio::main]  // Create an async function for testing
+/// async fn main() {
+///     let colors = load_colors().await.unwrap();
+///     if let Some(color) = colors.get("red") {
+///         println!("RGB for red: {:?}", color);
+///     }
+/// }
+/// ```
+
 pub async fn load_colors() -> Result<HashMap<String, Value>, Box<dyn Error>> {
-    // Si le fichier de cache existe et est valide, l'utiliser
+    // If the cache file exists and is valid, use it.
     if Path::new(CACHE_FILE_PATH).exists() && is_cache_valid() {
-        // Charger le fichier cache
+        // Load the cache file
         let cache_content = fs::read_to_string(CACHE_FILE_PATH)?;
         let colors: HashMap<String, Value> = serde_json::from_str(&cache_content)
             .map_err(|err| Box::new(err) as Box<dyn Error>)?;
         return Ok(colors);
     } else {
-        // Si le cache est absent ou expiré, télécharger le fichier JSON
+        // If the cache is absent or expired, download the JSON file.
         let response = get(COLORS_JSON_URL).await?.text().await?;
         
-        // Sauvegarder le fichier JSON dans le cache
-        fs::create_dir_all("cache")?;  // Créer le dossier "cache" s'il n'existe pas
-        fs::write(CACHE_FILE_PATH, &response)?;  // Écrire dans le fichier cache
+        // Save the JSON file to the cache for future use.
+        fs::create_dir_all("cache")?;  // Create the "cache" folder if it doesn't exist
+        fs::write(CACHE_FILE_PATH, &response)?;  // Write the downloaded content to the cache
         
-        // Charger le fichier JSON téléchargé
+        // Load the downloaded JSON file
         let colors: HashMap<String, Value> = serde_json::from_str(&response)
             .map_err(|err| Box::new(err) as Box<dyn Error>)?;
         return Ok(colors);

@@ -2,13 +2,29 @@ pub mod colors;
 
 use colors::load_colors;
 
-// Fonction pour obtenir les valeurs RGB d'une couleur par son nom
+
+/// ```rust
+/// use named_colors::get_color_by_name;
+/// use tokio;  // Nécessary to run async
+///
+/// #[tokio::main]  // Create an async function for testing
+/// async fn main() {
+///     let red_rgb = get_color_by_name("red").await;
+///     if let Some((r, g, b)) = red_rgb {
+///         println!("RGB for red is ({}, {}, {})", r, g, b);
+///     }
+/// }
+/// ```
 
 pub async fn get_color_by_name(color_name: &str) -> Option<(u8, u8, u8)> {
-    // Charger les couleurs depuis la fonction de cache/téléchargement
+    // Load the colors from the cache/download function
     let color_data = load_colors().await.unwrap_or_default();
-    let color_name = color_name.to_lowercase();  // Convertir en minuscule pour uniformiser la recherche
+    
+    // Convert the color name to lowercase to standardize the search
+    let color_name = color_name.to_lowercase();
+    
     if let Some(color) = color_data.get(&color_name) {
+        // Extract RGB values from the JSON
         let r = color["r"].as_u64().unwrap_or(0) as u8;
         let g = color["g"].as_u64().unwrap_or(0) as u8;
         let b = color["b"].as_u64().unwrap_or(0) as u8;
@@ -18,40 +34,41 @@ pub async fn get_color_by_name(color_name: &str) -> Option<(u8, u8, u8)> {
 }
 
 
-// Tests
+/// Unit tests for the `get_color_by_name` function.
+/// These tests check various conditions to ensure that the function works as expected.
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    /// Tests if the function returns the correct RGB values for the color "red".
     #[tokio::test]
     async fn test_get_color_by_name() {
-        // Tester une couleur valide
         let color = get_color_by_name("red").await;
-        assert_eq!(color, Some((255, 0, 0)));
+        assert_eq!(color, Some((255, 0, 0)));  // Expected RGB for "red"
     }
 
+    /// Tests if the function returns `None` for an invalid color.
     #[tokio::test]
     async fn test_get_color_by_invalid_name() {
-        // Tester une couleur invalide
         let color = get_color_by_name("invalid_color").await;
-        assert_eq!(color, None);
+        assert_eq!(color, None);  // No valid color found
     }
 
+    /// Tests case insensitivity: color names with different cases should work.
     #[tokio::test]
     async fn test_get_color_case_insensitive() {
-        // Tester la sensibilité à la casse
         let color = get_color_by_name("Red").await;
-        assert_eq!(color, Some((255, 0, 0)));
+        assert_eq!(color, Some((255, 0, 0)));  // The function should be case-insensitive
         
         let color_lowercase = get_color_by_name("red").await;
-        assert_eq!(color_lowercase, Some((255, 0, 0)));
+        assert_eq!(color_lowercase, Some((255, 0, 0)));  // Check with lowercase name
     }
 
+    /// Tests if the `load_colors` function works correctly.
+    /// In this test, we simply check that loading the colors is successful.
     #[tokio::test]
     async fn test_load_colors_failure() {
-        // Simuler un cas où le chargement des couleurs échoue (si possible)
-        // Exemple fictif, pourrait nécessiter des ajustements dans load_colors()
         let result = load_colors().await;
-        assert!(result.is_ok(), "Échec du chargement des couleurs.");
+        assert!(result.is_ok(), "Failed to load colors.");  // Ensure colors load correctly
     }
 }
