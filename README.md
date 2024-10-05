@@ -102,6 +102,8 @@ let invalid_color = get_color_by_name("invalid_color");
 assert!(invalid_color.is_none());
 ```
 
+[text](<test.gif>)
+
 ## Contributing
 
 Feel free to open issues or submit pull requests if you'd like to contribute to this project.
