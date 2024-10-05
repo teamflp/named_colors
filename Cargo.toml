@@ -1,6 +1,6 @@
 [package]
 name = "named_colors"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Paterne GNONZION <teamflp@yahoo.it>"]
 description = "A Rust library that provides named colors in RGB and Hexadecimal formats."
 repository = "https://github.com/teamflp/named_colors"
